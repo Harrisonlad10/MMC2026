@@ -1,8 +1,3 @@
-"""
-CMS Mathematical Modelling Competition 2026
-Task 4 – Female Foetus Aneuploidy Classification
-"""
-
 import pandas as pd
 import numpy as np
 import statsmodels.api as sm
@@ -11,18 +6,10 @@ from sklearn.metrics import accuracy_score, roc_auc_score, roc_curve
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 
-
-# ============================
-# CONFIG
-# ============================
-
+#Config
 FEMALE_FILE = "FemaleFoetus.csv"
 
-
-# ============================
-# LOAD DATA
-# ============================
-
+#Load
 columnNames = [
     'Sample ID', 'Pregnant woman ID', 'Maternal age', 'Maternal height',
     'Maternal weight', 'LMP Date', 'Conception Method', 'Test Date',
@@ -37,7 +24,7 @@ columnNames = [
 
 data = pd.read_csv(FEMALE_FILE, header=None, names=columnNames)
 
-# Convert numeric columns
+#Convert numeric columns
 numeric_cols = [
     'Z-score 13', 'Z-score 18', 'Z-score 21', 'Z-score X',
     'Maternal BMI', 'GC 13', 'GC 18', 'GC 21',
@@ -50,20 +37,14 @@ for col in numeric_cols:
 # Drop missing
 data = data.dropna(subset=numeric_cols)
 
-# ============================
-# CREATE BINARY OUTCOME
-# ============================
+#Convert to binary Outcome
 
 data['Abnormal'] = data['Aneuploidy Detected'].notna().astype(int)
 
 print("\nClass Distribution:")
 print(data['Abnormal'].value_counts())
 
-
-# ============================
-# FEATURE SELECTION
-# ============================
-
+#Feature Selection
 features = [
     'Z-score 13', 'Z-score 18', 'Z-score 21', 'Z-score X',
     'Maternal BMI', 'GC 13', 'GC 18', 'GC 21',
@@ -73,29 +54,23 @@ features = [
 X = data[features]
 y = data['Abnormal']
 
-# Standardise
+#Standardise
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
-# Train/test split
+#Train/test split
 X_train, X_test, y_train, y_test = train_test_split(
     X_scaled, y, test_size=0.3, random_state=42
 )
 
-# ============================
-# LOGISTIC REGRESSION MODEL
-# ============================
-
+#LOGISTIC REGRESSION MODEL
 X_train_sm = sm.add_constant(X_train)
 model = sm.Logit(y_train, X_train_sm).fit()
 
 print("\nLogistic Regression Summary:")
 print(model.summary())
 
-# ============================
-# EVALUATION
-# ============================
-
+#EVALUATION
 X_test_sm = sm.add_constant(X_test)
 y_pred_prob = model.predict(X_test_sm)
 y_pred = (y_pred_prob >= 0.5).astype(int)
@@ -107,11 +82,7 @@ print("\nModel Performance:")
 print("Accuracy:", accuracy)
 print("AUC:", auc)
 
-
-# ============================
-# ROC CURVE
-# ============================
-
+#ROC Curve
 fpr, tpr, _ = roc_curve(y_test, y_pred_prob)
 
 plt.figure()
